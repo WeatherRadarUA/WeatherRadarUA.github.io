@@ -18,21 +18,17 @@
             width: 100%;
             height: 100vh;
         }
-        .weather-tooltip {
+        .weather-icon-label {
             background: white;
             border: 1px solid #888;
             border-radius: 8px;
             padding: 3px 8px;
             font-family: Arial, sans-serif;
             font-weight: bold;
-            font-size: 13px;
+            font-size: 14px;
+            color: #000;
             white-space: nowrap;
             box-shadow: 0 1px 4px rgba(0,0,0,0.3);
-        }
-        .weather-tooltip .city-name {
-            font-weight: normal;
-            font-size: 11px;
-            display: block;
             text-align: center;
         }
     </style>
@@ -47,9 +43,9 @@
             maxZoom: 19
         }).setView([48.7, 31.5], 6);
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
             maxZoom: 19,
-            attribution: '© OpenStreetMap'
+            attribution: '© OpenStreetMap © CARTO'
         }).addTo(map);
 
         var cities = [
@@ -92,21 +88,19 @@
             return "☁️";
         }
 
+        function makeIcon(content) {
+            return L.divIcon({
+                className: "weather-icon-label",
+                html: content,
+                iconSize: [60, 26],
+                iconAnchor: [30, 13]
+            });
+        }
+
         var markers = {};
 
         cities.forEach(function(city) {
-            var marker = L.marker([city.lat, city.lon]).addTo(map);
-
-            marker.bindTooltip(
-                "⏳ Загрузка...",
-                {
-                    permanent: true,
-                    direction: "top",
-                    className: "weather-tooltip",
-                    offset: [0, -10]
-                }
-            );
-
+            var marker = L.marker([city.lat, city.lon], { icon: makeIcon("⏳") }).addTo(map);
             markers[city.name] = marker;
         });
 
@@ -124,11 +118,7 @@
                     var code = data.daily.weathercode[1];
                     var icon = getWeatherIcon(code);
 
-                    var tooltipHtml =
-                        icon + " +" + dayTemp + "°" +
-                        "<span class='city-name'>" + city.name + "</span>";
-
-                    markers[city.name].setTooltipContent(tooltipHtml);
+                    markers[city.name].setIcon(makeIcon(icon + " +" + dayTemp + "°"));
 
                     markers[city.name].bindPopup(
                         city.name + "<br>Днём: " + dayTemp + "°<br>Ночью: " + nightTemp + "°"
@@ -136,7 +126,7 @@
                 })
                 .catch(function(error) {
                     console.log("Ошибка погоды для " + city.name + ":", error);
-                    markers[city.name].setTooltipContent("⚠️ ошибка");
+                    markers[city.name].setIcon(makeIcon("⚠️"));
                 });
         });
     </script>
