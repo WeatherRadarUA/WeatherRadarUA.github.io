@@ -18,6 +18,28 @@
             width: 100%;
             height: 100vh;
         }
+        .weather-label {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            font-size: 14px;
+            white-space: nowrap;
+            text-shadow:
+                -1px -1px 0 #fff,
+                1px -1px 0 #fff,
+                -1px 1px 0 #fff,
+                1px 1px 0 #fff;
+        }
+        .weather-label .icon {
+            font-size: 20px;
+        }
+        .weather-label .city-name {
+            font-size: 12px;
+            font-weight: normal;
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -63,11 +85,39 @@
             { name: "Симферополь", lat: 44.9521, lon: 34.1024 }
         ];
 
+        function getWeatherIcon(code) {
+            if (code === 0 || code === 1) return "☀️";
+            if (code === 2) return "⛅";
+            if (code === 3) return "☁️";
+            if (code === 45 || code === 48) return "🌫️";
+            if (code >= 51 && code <= 65) return "🌧️";
+            if (code === 71 || code === 73 || code === 75) return "❄️";
+            if (code === 80 || code === 81 || code === 82) return "🌧️";
+            if (code === 95) return "⛈️";
+            return "☁️";
+        }
+
+        function makeLabel(city, dayTemp, icon) {
+            var html =
+                '<div class="weather-label">' +
+                    '<span class="icon">' + icon + '</span>' +
+                    '<span>+' + dayTemp + '°</span>' +
+                '</div>' +
+                '<div class="weather-label city-name">' + city.name + '</div>';
+
+            return L.divIcon({
+                className: "",
+                html: html,
+                iconSize: [100, 40],
+                iconAnchor: [10, 10]
+            });
+        }
+
         var markers = {};
 
         cities.forEach(function(city) {
-            var marker = L.marker([city.lat, city.lon]).addTo(map)
-                .bindPopup(city.name + "<br>Загрузка погоды...");
+            var icon = makeLabel(city, "…", "⏳");
+            var marker = L.marker([city.lat, city.lon], { icon: icon }).addTo(map);
             markers[city.name] = marker;
         });
 
@@ -83,17 +133,17 @@
                     var dayTemp = Math.round(data.daily.temperature_2m_max[1]);
                     var nightTemp = Math.round(data.daily.temperature_2m_min[1]);
                     var code = data.daily.weathercode[1];
+                    var icon = getWeatherIcon(code);
 
-                    var popupText = city.name + "<br>" +
-                        "Днём: " + dayTemp + "°<br>" +
-                        "Ночью: " + nightTemp + "°<br>" +
-                        "Код погоды: " + code;
+                    var newIcon = makeLabel(city, dayTemp, icon);
+                    markers[city.name].setIcon(newIcon);
 
-                    markers[city.name].bindPopup(popupText);
+                    markers[city.name].bindPopup(
+                        city.name + "<br>Днём: " + dayTemp + "°<br>Ночью: " + nightTemp + "°"
+                    );
                 })
                 .catch(function(error) {
                     console.log("Ошибка погоды для " + city.name + ":", error);
-                    markers[city.name].bindPopup(city.name + "<br>Ошибка загрузки погоды");
                 });
         });
     </script>
