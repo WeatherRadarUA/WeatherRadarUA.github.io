@@ -1,0 +1,300 @@
+:root {
+    --bg: #eef4f9;
+    --card-bg: #ffffff;
+    --text: #1c2733;
+    --muted: #6b7a8a;
+    --accent: #2e7de1;
+    --accent-dark: #1c5cb8;
+    --border: #dbe6f0;
+    --shadow: 0 2px 10px rgba(20, 40, 70, 0.08);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+}
+
+header.site-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    background: var(--card-bg);
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 18px;
+    text-decoration: none;
+    color: var(--text);
+}
+
+.brand .logo-emoji {
+    font-size: 22px;
+}
+
+nav.main-nav {
+    display: flex;
+    gap: 6px;
+}
+
+nav.main-nav a {
+    text-decoration: none;
+    color: var(--muted);
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+nav.main-nav a.active,
+nav.main-nav a:hover {
+    background: var(--accent);
+    color: #fff;
+}
+
+.lang-switch {
+    display: flex;
+    gap: 4px;
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 4px;
+}
+
+.lang-switch button {
+    border: none;
+    background: transparent;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+}
+
+.lang-switch button.active {
+    background: var(--accent);
+    color: #fff;
+}
+
+main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 20px 16px 60px;
+}
+
+.hero {
+    text-align: center;
+    padding: 30px 10px 10px;
+}
+
+.hero h1 {
+    font-size: 26px;
+    margin: 0 0 6px;
+}
+
+.hero p {
+    color: var(--muted);
+    margin: 0;
+    font-size: 15px;
+}
+
+.search-wrap {
+    position: relative;
+    margin: 22px 0;
+}
+
+.search-wrap input {
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 16px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    box-shadow: var(--shadow);
+    outline: none;
+}
+
+.search-wrap input:focus {
+    border-color: var(--accent);
+}
+
+.suggestions {
+    position: absolute;
+    top: 58px;
+    left: 0;
+    right: 0;
+    background: var(--card-bg);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    z-index: 500;
+    max-height: 320px;
+    overflow-y: auto;
+    display: none;
+}
+
+.suggestions.show {
+    display: block;
+}
+
+.suggestion-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    font-size: 15px;
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.suggestion-item:active,
+.suggestion-item:hover {
+    background: var(--bg);
+}
+
+.suggestion-item .sub {
+    color: var(--muted);
+    font-size: 12.5px;
+    margin-top: 2px;
+}
+
+.status-msg {
+    text-align: center;
+    color: var(--muted);
+    padding: 20px 0;
+    font-size: 14px;
+}
+
+.result-card {
+    background: var(--card-bg);
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+    padding: 20px;
+    margin-top: 18px;
+    display: none;
+}
+
+.result-card.show {
+    display: block;
+}
+
+.result-card .city-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0 0 2px;
+}
+
+.result-card .city-sub {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 14px;
+}
+
+.current-block {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 0 18px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 14px;
+}
+
+.current-block .big-icon {
+    font-size: 54px;
+    line-height: 1;
+}
+
+.current-block .big-temp {
+    font-size: 42px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.current-block .current-desc {
+    color: var(--muted);
+    font-size: 14px;
+    margin-top: 4px;
+}
+
+.hourly-scroll {
+    display: flex;
+    overflow-x: auto;
+    gap: 10px;
+    padding-bottom: 6px;
+}
+
+.hour-card {
+    flex: 0 0 auto;
+    width: 66px;
+    text-align: center;
+    background: var(--bg);
+    border-radius: 12px;
+    padding: 10px 6px;
+}
+
+.hour-card .h-time {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+}
+
+.hour-card .h-icon {
+    font-size: 22px;
+    margin-bottom: 6px;
+}
+
+.hour-card .h-temp {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.map-page main {
+    max-width: none;
+    padding: 0;
+}
+
+#map {
+    width: 100%;
+    height: calc(100vh - 66px);
+}
+
+.weather-icon-label {
+    background: white;
+    border: 1px solid #888;
+    border-radius: 8px;
+    padding: 3px 8px;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    font-size: 14px;
+    color: #000;
+    white-space: nowrap;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    text-align: center;
+}
+
+footer.site-footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 12.5px;
+    padding: 20px;
+}

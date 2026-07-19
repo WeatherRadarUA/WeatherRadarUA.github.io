@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Карта погоди — Погода UA</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="map-page">
+
+    <header class="site-header">
+        <a class="brand" href="index.html">
+            <span class="logo-emoji">🌤️</span>
+            <span data-i18n="siteName">Погода UA</span>
+        </a>
+        <nav class="main-nav">
+            <a href="index.html" data-i18n="navSearch">Пошук</a>
+            <a href="map.html" class="active" data-i18n="navMap">Карта</a>
+        </nav>
+        <div class="lang-switch" id="langSwitch"></div>
+    </header>
+
+    <main>
+        <div id="map"></div>
+    </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="i18n.js"></script>
+    <script src="weather-icons.js"></script>
+    <script src="map.js"></script>
+</body>
+</html>

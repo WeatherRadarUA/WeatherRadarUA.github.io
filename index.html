@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Погода UA — прогноз для будь-якого міста</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="site-header">
+        <a class="brand" href="index.html">
+            <span class="logo-emoji">🌤️</span>
+            <span data-i18n="siteName">Погода UA</span>
+        </a>
+        <nav class="main-nav">
+            <a href="index.html" class="active" data-i18n="navSearch">Пошук</a>
+            <a href="map.html" data-i18n="navMap">Карта</a>
+        </nav>
+        <div class="lang-switch" id="langSwitch"></div>
+    </header>
+
+    <main>
+        <div class="hero">
+            <h1 data-i18n="heroTitle">Погода будь-якого міста України</h1>
+            <p data-i18n="heroSubtitle">Введіть назву населеного пункту — від великого міста до маленького села</p>
+        </div>
+
+        <div class="search-wrap">
+            <input type="text" id="cityInput" data-i18n-placeholder="searchPlaceholder" placeholder="Введіть назву міста або села...">
+            <div class="suggestions" id="suggestions"></div>
+        </div>
+
+        <div class="status-msg" id="statusMsg" style="display:none;"></div>
+
+        <div class="result-card" id="resultCard">
+            <div class="city-title" id="cityTitle"></div>
+            <div class="city-sub" id="citySub"></div>
+
+            <div class="current-block">
+                <div class="big-icon" id="bigIcon"></div>
+                <div>
+                    <div class="big-temp" id="bigTemp"></div>
+                    <div class="current-desc" id="currentDesc"></div>
+                </div>
+            </div>
+
+            <div style="font-weight:600; margin-bottom:8px;" data-i18n="next24h">Погодинний прогноз на 24 години</div>
+            <div class="hourly-scroll" id="hourlyScroll"></div>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        Дані: Open-Meteo · OpenStreetMap
+    </footer>
+
+    <script src="i18n.js"></script>
+    <script src="weather-icons.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
