@@ -34,6 +34,35 @@
 
         L.marker([50.4501, 30.5234]).addTo(map)
             .bindPopup("Киев");
+        var worldWithHole = {
+            "type": "Feature",
+            "properties": {},
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [[-180, -90], [-180, 90], [180, 90], [180, -90], [-180, -90]]
+                ]
+            }
+        };
+
+        fetch('https://raw.githubusercontent.com/georgique/world-geojson/main/countries/ukraine.json')
+            .then(response => response.json())
+            .then(ukraineData => {
+                worldWithHole.geometry.coordinates.push(
+                    ukraineData.features[0].geometry.coordinates[0]
+                );
+
+                L.geoJSON(worldWithHole, {
+                    style: {
+                        fillColor: "#1a1a1a",
+                        fillOpacity: 1,
+                        stroke: false
+                    }
+                }).addTo(map);
+            })
+            .catch(error => {
+                console.log("Ошибка загрузки контура Украины:", error);
+            });
     </script>
 
 </body>
