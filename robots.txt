@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://weatherradarua.github.io/sitemap.xml
