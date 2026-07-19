@@ -63,9 +63,38 @@
             { name: "Симферополь", lat: 44.9521, lon: 34.1024 }
         ];
 
+        var markers = {};
+
         cities.forEach(function(city) {
-            L.marker([city.lat, city.lon]).addTo(map)
-                .bindPopup(city.name);
+            var marker = L.marker([city.lat, city.lon]).addTo(map)
+                .bindPopup(city.name + "<br>Загрузка погоды...");
+            markers[city.name] = marker;
+        });
+
+        cities.forEach(function(city) {
+            var url = "https://api.open-meteo.com/v1/forecast?latitude=" + city.lat +
+                       "&longitude=" + city.lon +
+                       "&daily=temperature_2m_max,temperature_2m_min,weathercode" +
+                       "&timezone=Europe/Kyiv";
+
+            fetch(url)
+                .then(function(response) { return response.json(); })
+                .then(function(data) {
+                    var dayTemp = Math.round(data.daily.temperature_2m_max[1]);
+                    var nightTemp = Math.round(data.daily.temperature_2m_min[1]);
+                    var code = data.daily.weathercode[1];
+
+                    var popupText = city.name + "<br>" +
+                        "Днём: " + dayTemp + "°<br>" +
+                        "Ночью: " + nightTemp + "°<br>" +
+                        "Код погоды: " + code;
+
+                    markers[city.name].bindPopup(popupText);
+                })
+                .catch(function(error) {
+                    console.log("Ошибка погоды для " + city.name + ":", error);
+                    markers[city.name].bindPopup(city.name + "<br>Ошибка загрузки погоды");
+                });
         });
     </script>
 
