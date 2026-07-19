@@ -17,7 +17,7 @@
         #map {
             width: 100%;
             height: 100vh;
-            background: #1a1a1a;
+            background: #cfe3ec;
         }
     </style>
 </head>
@@ -27,14 +27,14 @@
 
     <script>
         var ukraineBounds = [
-            [43.0, 18.0],
-            [53.5, 43.0]
+            [43.5, 19.5],
+            [53.0, 41.0]
         ];
 
         var map = L.map('map', {
             maxBounds: ukraineBounds,
-            maxBoundsViscosity: 0.8,
-            minZoom: 5
+            maxBoundsViscosity: 0.7,
+            minZoom: 6
         });
 
         map.fitBounds([[44.0, 21.5], [52.5, 40.5]]);
@@ -46,41 +46,6 @@
 
         L.marker([50.4501, 30.5234]).addTo(map)
             .bindPopup("Киев");
-
-        var outerRing = [
-            [10.0, -10.0], [10.0, 70.0], [65.0, 70.0], [65.0, -10.0], [10.0, -10.0]
-        ];
-
-        var worldWithHole = {
-            "type": "Feature",
-            "properties": {},
-            "geometry": {
-                "type": "Polygon",
-                "coordinates": [
-                    outerRing.map(function(c) { return [c[1], c[0]]; })
-                ]
-            }
-        };
-
-        fetch('https://raw.githubusercontent.com/georgique/world-geojson/main/countries/ukraine.json')
-            .then(response => response.json())
-            .then(ukraineData => {
-                worldWithHole.geometry.coordinates.push(
-                    ukraineData.features[0].geometry.coordinates[0]
-                );
-
-                L.geoJSON(worldWithHole, {
-                    renderer: L.canvas({ padding: 10 }),
-                    style: {
-                        fillColor: "#1a1a1a",
-                        fillOpacity: 1,
-                        stroke: false
-                    }
-                }).addTo(map);
-            })
-            .catch(error => {
-                console.log("Ошибка загрузки контура Украины:", error);
-            });
     </script>
 
 </body>
