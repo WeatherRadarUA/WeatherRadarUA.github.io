@@ -3,38 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Інтерактивна карта погоди України — Погода UA</title>
-    <meta name="description" content="Інтерактивна карта погоди по всіх обласних центрах України з можливістю зумувати та рухати карту.">
+    <meta name="theme-color" content="#2e7de1">
+    <title>Карта погоди України — Погода UA</title>
+    <meta name="description" content="Інтерактивна карта погоди України з шарами опадів, температури, вітру та тиску. Переглядайте погоду для будь-якого міста або села!">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
     <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Roboto+Slab:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body class="map-page">
+    <!-- Animated Background -->
+    <div class="animated-bg" id="animatedBg">
+        <div class="cloud cloud-1"></div>
+        <div class="cloud cloud-2"></div>
+        <div class="cloud cloud-3"></div>
+    </div>
 
+    <!-- Header -->
     <header class="site-header">
-        <a class="brand" href="index.html">
-            <span class="logo-emoji">🌤️</span>
-            <span data-i18n="siteName">Погода UA</span>
-        </a>
-        <nav class="main-nav">
-            <a href="index.html" data-i18n="navSearch">Пошук</a>
-            <a href="map.html" class="active" data-i18n="navMap">Карта</a>
-        </nav>
-        <div class="lang-switch" id="langSwitch"></div>
+        <div class="header-left">
+            <a class="brand" href="index.html">
+                <span class="logo-icon"><i class="fas fa-cloud-sun"></i></span>
+                <span class="logo-text" data-i18n="siteName">Погода UA</span>
+            </a>
+        </div>
+        <div class="header-center">
+            <nav class="main-nav">
+                <a href="index.html" data-i18n="navSearch">Пошук</a>
+                <a href="map.html" class="active" data-i18n="navMap">Карта</a>
+                <a href="#" id="radarBtn" data-i18n="navRadar">Радар</a>
+            </nav>
+        </div>
+        <div class="header-right">
+            <button class="theme-toggle" id="themeToggle" title="Перемкнути тему">
+                <i class="fas fa-moon"></i>
+            </button>
+            <button class="geoloc-btn" id="geolocBtn" title="Мое місцезнаходження">
+                <i class="fas fa-location-arrow"></i>
+            </button>
+            <div class="lang-switch" id="langSwitch"></div>
+        </div>
     </header>
 
+    <!-- Map Controls -->
+    <div class="map-controls">
+        <div class="map-control-group">
+            <button class="map-control-btn active" id="layerBase" title="Основна карта">
+                <i class="fas fa-map"></i>
+            </button>
+            <button class="map-control-btn" id="layerSatellite" title="Супутник">
+                <i class="fas fa-satellite"></i>
+            </button>
+        </div>
+        <div class="map-control-group">
+            <button class="map-control-btn" id="layerPrecip" title="Опади">
+                <i class="fas fa-tint"></i>
+            </button>
+            <button class="map-control-btn" id="layerTemp" title="Температура">
+                <i class="fas fa-thermometer-half"></i>
+            </button>
+            <button class="map-control-btn" id="layerWind" title="Вітер">
+                <i class="fas fa-wind"></i>
+            </button>
+        </div>
+        <div class="map-control-group">
+            <button class="map-control-btn" id="zoomIn" title="Наблизити">
+                <i class="fas fa-plus"></i>
+            </button>
+            <button class="map-control-btn" id="zoomOut" title="Віддати">
+                <i class="fas fa-minus"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Map -->
     <main>
         <div id="map"></div>
-        <div class="zoom-hint" id="zoomHint" data-i18n="zoomHint">Наближайте карту, щоб побачити більше населених пунктів</div>
+        <div class="zoom-hint" id="zoomHint" data-i18n="zoomHint">Наближте карту, щоб побачити більше населених пунктів</div>
         <div class="map-loading" id="mapLoading"></div>
     </main>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    <!-- Weather Popup -->
+    <div class="map-popup" id="mapPopup">
+        <div class="popup-content">
+            <div class="popup-header">
+                <h3 id="popupTitle">Місто</h3>
+                <button class="close-popup" id="closePopup"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="popup-body">
+                <div class="popup-weather">
+                    <div class="popup-icon" id="popupIcon">☀️</div>
+                    <div class="popup-temp" id="popupTemp">--°</div>
+                </div>
+                <div class="popup-details">
+                    <div class="popup-detail"><i class="fas fa-thermometer-half"></i> <span id="popupMax">Макс: --°</span></div>
+                    <div class="popup-detail"><i class="fas fa-thermometer-empty"></i> <span id="popupMin">Мін: --°</span></div>
+                    <div class="popup-detail"><i class="fas fa-tint"></i> <span id="popupDesc">Опис</span></div>
+                </div>
+                <button class="popup-action" id="popupViewDetails">
+                    <i class="fas fa-arrow-right"></i> Детальний прогноз
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Radar Modal -->
+    <div class="modal" id="radarModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 data-i18n="radarTitle">Радар опадів</h2>
+                <button class="close-modal" id="closeRadar"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="radar-container">
+                <div class="radar-info" data-i18n="radarInfo">Радар показує опади в реальному часі. Оновлюється кожні 10 хвилин.</div>
+                <iframe id="radarFrame" src="https://www.ventusky.com/?p=48.7;31.5;5&l=rain" frameborder="0"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-left">
+                <span>© 2024 Погода UA</span>
+            </div>
+            <div class="footer-center">
+                <span data-i18n="footerData">Дані: Open-Meteo · OpenStreetMap · Ventusky</span>
+            </div>
+            <div class="footer-right">
+                <a href="index.html" data-i18n="navSearch">Пошук</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
     <script src="i18n.js"></script>
     <script src="weather-icons.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
     <script src="map.js"></script>
 </body>
 </html>

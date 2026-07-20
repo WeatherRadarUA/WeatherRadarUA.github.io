@@ -1,4 +1,22 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://weatherradarua.github.io/sitemap.xml
+Sitemap: https://WeatherRadarUA.github.io/sitemap.xml
+
+# Дозволяємо індексування для всіх пошукових систем
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Yandex
+Allow: /
+
+# Забороняємо індексування адмінських сторінок (якщо з'явиться)
+User-agent: *
+Disallow: /admin/
+Disallow: /private/
+
+# Кешування
+Cache-Control: max-age=3600
