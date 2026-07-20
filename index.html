@@ -16,9 +16,93 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Roboto+Slab:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* Fallback для loading screen, якщо JS не завантажиться */
+        /* Fallback для loading screen */
         .loading-screen { display: none !important; }
+        /* Fallback для основних стилів, якщо CSS не завантажиться */
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f0f4f8; }
+        .site-header { background: white; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .search-box { margin: 20px; }
+        .search-box input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; }
+        button { cursor: pointer; }
     </style>
+    <script>
+        // Глобальна функція перекладу (fallback)
+        window.t = function(key) {
+            var translations = {
+                loading: "Завантаження...",
+                searching: "Шукаємо...",
+                noResults: "Нічого не знайдено",
+                enterCity: "Введіть назву міста",
+                error: "Помилка",
+                tryAgain: "Спробуйте ще раз"
+            };
+            return translations[key] || key;
+        };
+        
+        // Перевірка завантаження скриптів
+        window.scriptsLoaded = {
+            i18n: false,
+            weatherIcons: false,
+            app: false
+        };
+        
+        // Функція для завантаження скриптів з перевіркою
+        function loadScript(url, callback, onerror) {
+            var script = document.createElement('script');
+            script.src = url;
+            script.async = false;
+            script.onload = function() {
+                callback();
+            };
+            script.onerror = function() {
+                console.error('Failed to load script: ' + url);
+                if (onerror) onerror();
+            };
+            document.head.appendChild(script);
+        }
+        
+        // Завантажуємо скрипти в правильному порядку
+        window.addEventListener('DOMContentLoaded', function() {
+            // Приховуємо екран завантаження
+            var loadingScreen = document.getElementById('loadingScreen');
+            if (loadingScreen) {
+                loadingScreen.style.display = 'none';
+            }
+            
+            // Завантажуємо i18n.js
+            loadScript('i18n.js', function() {
+                window.scriptsLoaded.i18n = true;
+                console.log('i18n.js loaded');
+                
+                // Завантажуємо weather-icons.js
+                loadScript('weather-icons.js', function() {
+                    window.scriptsLoaded.weatherIcons = true;
+                    console.log('weather-icons.js loaded');
+                    
+                    // Завантажуємо app.js
+                    loadScript('app.js', function() {
+                        window.scriptsLoaded.app = true;
+                        console.log('app.js loaded');
+                        
+                        // Реєструємо Service Worker після завантаження всіх скриптів
+                        if ('serviceWorker' in navigator) {
+                            setTimeout(function() {
+                                navigator.serviceWorker.register('/service-worker.js').catch(function(e) {
+                                    console.log('ServiceWorker error:', e);
+                                });
+                            }, 1000);
+                        }
+                    }, function() {
+                        console.error('Failed to load app.js');
+                    });
+                }, function() {
+                    console.error('Failed to load weather-icons.js');
+                });
+            }, function() {
+                console.error('Failed to load i18n.js');
+            });
+        });
+    </script>
 </head>
 <body>
     <!-- Animated Background -->
@@ -34,7 +118,7 @@
     <div class="loading-screen" id="loadingScreen">
         <div class="loader">
             <div class="loader-icon">☀️</div>
-            <div class="loader-text" data-i18n="loading">Завантаження...</div>
+            <div class="loader-text">Завантаження...</div>
         </div>
     </div>
 
@@ -43,15 +127,15 @@
         <div class="header-left">
             <a class="brand" href="index.html">
                 <span class="logo-icon"><i class="fas fa-cloud-sun"></i></span>
-                <span class="logo-text" data-i18n="siteName">Погода UA</span>
+                <span class="logo-text">Погода UA</span>
             </a>
         </div>
         <div class="header-center">
             <nav class="main-nav">
-                <a href="index.html" class="active" data-i18n="navSearch">Пошук</a>
-                <a href="map.html" data-i18n="navMap">Карта</a>
-                <a href="#" id="radarBtn" data-i18n="navRadar">Радар</a>
-                <a href="#" id="warningsBtn" data-i18n="navWarnings">Попередження</a>
+                <a href="index.html" class="active">Пошук</a>
+                <a href="map.html">Карта</a>
+                <a href="#" id="radarBtn">Радар</a>
+                <a href="#" id="warningsBtn">Попередження</a>
             </nav>
         </div>
         <div class="header-right">
@@ -74,12 +158,12 @@
         <!-- Hero Section -->
         <div class="hero">
             <div class="hero-content">
-                <h1 data-i18n="heroTitle">⚡ Сучасний прогноз погоди для України</h1>
-                <p data-i18n="heroSubtitle">Точні дані, інтерактивна карта, радар опадів та попередження про небезпечну погоду</p>
+                <h1>⚡ Сучасний прогноз погоди для України</h1>
+                <p>Точні дані, інтерактивна карта, радар опадів та попередження про небезпечну погоду</p>
                 <div class="hero-features">
-                    <span><i class="fas fa-check-circle"></i> <span data-i18n="feature1">25+ тис. населених пунктів</span></span>
-                    <span><i class="fas fa-check-circle"></i> <span data-i18n="feature2">Радар опадів в реальному часі</span></span>
-                    <span><i class="fas fa-check-circle"></i> <span data-i18n="feature3">Попередження про небезпеку</span></span>
+                    <span><i class="fas fa-check-circle"></i> 25+ тис. населених пунктів</span>
+                    <span><i class="fas fa-check-circle"></i> Радар опадів в реальному часі</span>
+                    <span><i class="fas fa-check-circle"></i> Попередження про небезпеку</span>
                 </div>
             </div>
         </div>
@@ -89,7 +173,6 @@
             <div class="search-box">
                 <i class="fas fa-search search-icon"></i>
                 <input type="text" id="cityInput" 
-                       data-i18n-placeholder="searchPlaceholder" 
                        placeholder="Введіть назву міста або села..."
                        autocomplete="off">
                 <button class="clear-btn" id="clearSearch"><i class="fas fa-times"></i></button>
@@ -97,7 +180,7 @@
             </div>
             <div class="suggestions" id="suggestions"></div>
             <div class="recent-searches" id="recentSearches">
-                <div class="section-label" data-i18n="recentSearches">Останні пошуки:</div>
+                <div class="section-label">Останні пошуки:</div>
                 <div class="recent-list" id="recentList"></div>
             </div>
         </div>
@@ -136,22 +219,22 @@
                     <div class="detail-row">
                         <div class="detail-item">
                             <i class="fas fa-temperature-high"></i>
-                            <span class="detail-label" data-i18n="maxTemp">Макс:</span>
+                            <span class="detail-label">Макс:</span>
                             <span class="detail-value" id="maxTemp">--°</span>
                         </div>
                         <div class="detail-item">
                             <i class="fas fa-temperature-low"></i>
-                            <span class="detail-label" data-i18n="minTemp">Мін:</span>
+                            <span class="detail-label">Мін:</span>
                             <span class="detail-value" id="minTemp">--°</span>
                         </div>
                         <div class="detail-item">
                             <i class="fas fa-tint"></i>
-                            <span class="detail-label" data-i18n="humidity">Вологість:</span>
+                            <span class="detail-label">Вологість:</span>
                             <span class="detail-value" id="humidity">--%</span>
                         </div>
                         <div class="detail-item">
                             <i class="fas fa-wind"></i>
-                            <span class="detail-label" data-i18n="wind">Вітер:</span>
+                            <span class="detail-label">Вітер:</span>
                             <span class="detail-value" id="wind">-- км/г</span>
                         </div>
                     </div>
@@ -162,17 +245,17 @@
             <div class="sun-moon-info" id="sunMoonInfo">
                 <div class="sunrise-item">
                     <i class="fas fa-sun"></i>
-                    <span class="sun-label" data-i18n="sunrise">Схід сонця:</span>
+                    <span class="sun-label">Схід сонця:</span>
                     <span class="sun-time" id="sunriseTime">--:--</span>
                 </div>
                 <div class="sunset-item">
                     <i class="fas fa-moon"></i>
-                    <span class="sun-label" data-i18n="sunset">Захід сонця:</span>
+                    <span class="sun-label">Захід сонця:</span>
                     <span class="sun-time" id="sunsetTime">--:--</span>
                 </div>
                 <div class="day-length">
                     <i class="fas fa-clock"></i>
-                    <span class="sun-label" data-i18n="dayLength">Тривалість дня:</span>
+                    <span class="sun-label">Тривалість дня:</span>
                     <span class="sun-time" id="dayLength">-- год</span>
                 </div>
             </div>
@@ -182,28 +265,28 @@
                 <div class="info-chip">
                     <div class="chip-icon"><i class="fas fa-sun"></i></div>
                     <div class="chip-content">
-                        <div class="chip-label" data-i18n="uvIndex">УФ-індекс</div>
+                        <div class="chip-label">УФ-індекс</div>
                         <div class="chip-value" id="uvValue">--</div>
                     </div>
                 </div>
                 <div class="info-chip">
                     <div class="chip-icon aqi-icon"><i class="fas fa-leaf"></i></div>
                     <div class="chip-content">
-                        <div class="chip-label" data-i18n="airQuality">Якість повітря</div>
+                        <div class="chip-label">Якість повітря</div>
                         <div class="chip-value" id="aqiValue">--</div>
                     </div>
                 </div>
                 <div class="info-chip">
                     <div class="chip-icon"><i class="fas fa-eye"></i></div>
                     <div class="chip-content">
-                        <div class="chip-label" data-i18n="visibility">Видимість</div>
+                        <div class="chip-label">Видимість</div>
                         <div class="chip-value" id="visibilityValue">-- км</div>
                     </div>
                 </div>
                 <div class="info-chip">
                     <div class="chip-icon"><i class="fas fa-tint"></i></div>
                     <div class="chip-content">
-                        <div class="chip-label" data-i18n="precipitation">Опади</div>
+                        <div class="chip-label">Опади</div>
                         <div class="chip-value" id="precipValue">-- мм</div>
                     </div>
                 </div>
@@ -212,35 +295,33 @@
             <!-- Hourly Forecast -->
             <div class="section">
                 <div class="section-header">
-                    <h2 class="section-title" data-i18n="next24h">Погодинний прогноз на 24 години</h2>
+                    <h2 class="section-title">Погодинний прогноз на 24 години</h2>
                     <div class="section-actions">
                         <button class="scroll-btn left" id="hourlyScrollLeft"><i class="fas fa-chevron-left"></i></button>
                         <button class="scroll-btn right" id="hourlyScrollRight"><i class="fas fa-chevron-right"></i></button>
                     </div>
                 </div>
-                <div class="hourly-scroll" id="hourlyScroll">
-                    <!-- Hour cards will be inserted here -->
-                </div>
+                <div class="hourly-scroll" id="hourlyScroll"></div>
             </div>
 
             <!-- Day Parts Forecast -->
             <div class="section">
-                <h2 class="section-title" data-i18n="dayParts">Прогноз за частинами дня</h2>
+                <h2 class="section-title">Прогноз за частинами дня</h2>
                 <div class="day-tabs" id="dayTabs"></div>
                 <div class="day-parts-grid" id="dayPartsGrid"></div>
             </div>
 
             <!-- 14-Day Forecast -->
             <div class="section">
-                <h2 class="section-title" data-i18n="forecast14">Прогноз на 14 днів</h2>
+                <h2 class="section-title">Прогноз на 14 днів</h2>
                 <div class="forecast14-list" id="forecast14List"></div>
             </div>
 
             <!-- Additional Info -->
             <div class="additional-info">
                 <div class="info-block">
-                    <h3><i class="fas fa-info-circle"></i> <span data-i18n="dataSources">Джерела даних</span></h3>
-                    <p data-i18n="dataSourcesText">Дані надаються Open-Meteo, OpenStreetMap та іншими відкритими джерелами.</p>
+                    <h3><i class="fas fa-info-circle"></i> Джерела даних</h3>
+                    <p>Дані надаються Open-Meteo, OpenStreetMap та іншими відкритими джерелами.</p>
                 </div>
             </div>
         </div>
@@ -249,11 +330,11 @@
     <!-- Favorites Sidebar -->
     <div class="favorites-sidebar" id="favoritesSidebar">
         <div class="sidebar-header">
-            <h3 data-i18n="favorites">Улюблені місця</h3>
+            <h3>Улюблені місця</h3>
             <button class="close-sidebar" id="closeFavorites"><i class="fas fa-times"></i></button>
         </div>
         <div class="favorites-list" id="favoritesList">
-            <div class="empty-state" data-i18n="noFavorites">У вас поки що немає улюблених місць</div>
+            <div class="empty-state">У вас поки що немає улюблених місць</div>
         </div>
     </div>
 
@@ -261,11 +342,11 @@
     <div class="modal" id="radarModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 data-i18n="radarTitle">Радар опадів</h2>
+                <h2>Радар опадів</h2>
                 <button class="close-modal" id="closeRadar"><i class="fas fa-times"></i></button>
             </div>
             <div class="radar-container">
-                <div class="radar-info" data-i18n="radarInfo">Радар показує опади в реальному часі. Оновлюється кожні 10 хвилин.</div>
+                <div class="radar-info">Радар показує опади в реальному часі. Оновлюється кожні 10 хвилин.</div>
                 <iframe id="radarFrame" src="https://www.ventusky.com/?p=48.7;31.5;5&l=rain" frameborder="0"></iframe>
             </div>
         </div>
@@ -275,15 +356,15 @@
     <div class="modal" id="warningsModal">
         <div class="modal-content warnings-content">
             <div class="modal-header">
-                <h2 data-i18n="warningsTitle">Попередження про погоду</h2>
+                <h2>Попередження про погоду</h2>
                 <button class="close-modal" id="closeWarnings"><i class="fas fa-times"></i></button>
             </div>
             <div class="warnings-list" id="warningsList">
                 <div class="warning-item example">
                     <div class="warning-icon"><i class="fas fa-info-circle"></i></div>
                     <div class="warning-content">
-                        <h4 data-i18n="warningExample">Наразі попереджень немає</h4>
-                        <p data-i18n="warningExampleText">Попередження про небезпечну погоду (шторми, град, сильні дощі) з'являться тут.</p>
+                        <h4>Наразі попереджень немає</h4>
+                        <p>Попередження про небезпечну погоду (шторми, град, сильні дощі) з'являться тут.</p>
                     </div>
                 </div>
             </div>
@@ -297,11 +378,11 @@
                 <span>© 2024 Погода UA</span>
             </div>
             <div class="footer-center">
-                <span data-i18n="footerData">Дані: Open-Meteo · OpenStreetMap · Ventusky</span>
+                <span>Дані: Open-Meteo · OpenStreetMap · Ventusky</span>
             </div>
             <div class="footer-right">
-                <a href="#" id="aboutBtn" data-i18n="about">Про нас</a>
-                <a href="#" id="feedbackBtn" data-i18n="feedback">Зворотний зв'язок</a>
+                <a href="#" id="aboutBtn">Про нас</a>
+                <a href="#" id="feedbackBtn">Зворотний зв'язок</a>
             </div>
         </div>
     </footer>
@@ -313,11 +394,5 @@
 
     <!-- Toast Notifications -->
     <div class="toast-container" id="toastContainer"></div>
-
-    <!-- Load scripts at the end of body for better performance -->
-    <script src="i18n.js"></script>
-    <script src="weather-icons.js"></script>
-    <script src="app.js"></script>
-    <!-- Service Worker registration moved to app.js to avoid blocking -->
 </body>
 </html>

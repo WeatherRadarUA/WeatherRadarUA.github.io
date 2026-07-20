@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Page</title>
+    <script>
+        function testAlert() {
+            alert('JavaScript працює!');
+        }
+        
+        function testConsole() {
+            console.log('JavaScript працює! Перевірте консоль (F12)');
+        }
+        
+        function testFetch() {
+            fetch('https://api.open-meteo.com/v1/forecast?latitude=50.45&longitude=30.52&current=temperature_2m')
+                .then(r => r.json())
+                .then(data => {
+                    console.log('API працює!', data);
+                    alert('API працює! Температура: ' + data.current.temperature_2m + '°C');
+                })
+                .catch(e => {
+                    console.error('API помилка:', e);
+                    alert('API помилка: ' + e.message);
+                });
+        }
+    </script>
+</head>
+<body>
+    <h1>Тестова сторінка</h1>
+    <p>Натисніть кнопки, щоб перевірити роботу JavaScript:</p>
+    
+    <button onclick="testAlert()">Тест Alert</button>
+    <button onclick="testConsole()">Тест Console</button>
+    <button onclick="testFetch()">Тест API (Open-Meteo)</button>
+    
+    <div id="result"></div>
+    
+    <script>
+        // Автоматичний тест
+        console.log('Сторінка завантажена. JavaScript працює!');
+        document.getElementById('result').innerHTML = '<p style="color: green;">JavaScript працює!</p>';
+    </script>
+</body>
+</html>
