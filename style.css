@@ -497,20 +497,33 @@ main {
     background: white;
     border: 1px solid #888;
     border-radius: 8px;
-    padding: 3px 8px;
+    padding: 3px 6px;
     font-family: Arial, sans-serif;
-    font-weight: bold;
-    font-size: 14px;
     color: #000;
     white-space: nowrap;
     box-shadow: 0 1px 4px rgba(0,0,0,0.3);
     text-align: center;
+    line-height: 1.25;
 }
 
-.weather-icon-label.small {
+.weather-icon-label .label-main {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.weather-icon-label .label-name {
+    font-weight: 500;
+    font-size: 10.5px;
+    color: #333;
+}
+
+.weather-icon-label.small .label-main {
     font-size: 11.5px;
-    padding: 2px 6px;
     font-weight: 600;
+}
+
+.weather-icon-label.small .label-name {
+    font-size: 9px;
 }
 
 footer.site-footer {

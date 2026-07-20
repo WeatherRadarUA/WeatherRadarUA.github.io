@@ -22,12 +22,14 @@ document.addEventListener("DOMContentLoaded", function () {
     var zoomHint = document.getElementById("zoomHint");
     var mapLoading = document.getElementById("mapLoading");
 
-    function makeIcon(content, small) {
+    function makeIcon(content, small, name) {
+        var nameLine = name ? "<div class='label-name'>" + name + "</div>" : "";
+        var html = "<div class='label-main'>" + content + "</div>" + nameLine;
         return L.divIcon({
             className: small ? "weather-icon-label small" : "weather-icon-label",
-            html: content,
-            iconSize: small ? [50, 20] : [60, 26],
-            iconAnchor: small ? [25, 10] : [30, 13]
+            html: html,
+            iconSize: small ? [70, 34] : [90, 40],
+            iconAnchor: small ? [35, 17] : [45, 20]
         });
     }
 
@@ -64,7 +66,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var baseMarkers = {};
 
     baseCities.forEach(function (city) {
-        var marker = L.marker([city.lat, city.lon], { icon: makeIcon("⏳") }).addTo(map);
+        var marker = L.marker([city.lat, city.lon], { icon: makeIcon("⏳", false, city.name) }).addTo(map);
         baseMarkers[city.name] = marker;
     });
 
@@ -82,7 +84,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 var code = data.daily.weathercode[0];
                 var icon = getWeatherIcon(code);
 
-                baseMarkers[city.name].setIcon(makeIcon(icon + " +" + dayTemp + "°"));
+                baseMarkers[city.name].setIcon(makeIcon(icon + " +" + dayTemp + "°", false, city.name));
 
                 var lang = getCurrentLang();
                 baseMarkers[city.name].bindPopup(
@@ -92,7 +94,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 );
             })
             .catch(function () {
-                baseMarkers[city.name].setIcon(makeIcon("⚠️"));
+                baseMarkers[city.name].setIcon(makeIcon("⚠️", false, city.name));
             });
     });
 
@@ -202,7 +204,7 @@ document.addEventListener("DOMContentLoaded", function () {
             "&daily=temperature_2m_max,weathercode&timezone=auto";
 
         var localMarkers = newPoints.map(function (p) {
-            var marker = L.marker([p.lat, p.lon], { icon: makeIcon("⏳", true) });
+            var marker = L.marker([p.lat, p.lon], { icon: makeIcon("⏳", true, p.name) });
             marker.bindPopup("<b>" + p.name + "</b>");
             villageCluster.addLayer(marker);
             return marker;
@@ -220,7 +222,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     var code = dayData.daily.weathercode[0];
                     var icon = getWeatherIcon(code);
 
-                    localMarkers[index].setIcon(makeIcon(icon + " +" + dayTemp + "°", true));
+                    localMarkers[index].setIcon(makeIcon(icon + " +" + dayTemp + "°", true, newPoints[index].name));
 
                     var lang = getCurrentLang();
                     localMarkers[index].setPopupContent(
@@ -231,8 +233,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
             })
             .catch(function () {
-                localMarkers.forEach(function (m) {
-                    m.setIcon(makeIcon("⚠️", true));
+                localMarkers.forEach(function (m, idx) {
+                    m.setIcon(makeIcon("⚠️", true, newPoints[idx].name));
                 });
             });
     }
