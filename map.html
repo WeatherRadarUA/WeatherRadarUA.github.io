@@ -7,6 +7,8 @@
     <meta name="description" content="Інтерактивна карта погоди по всіх обласних центрах України з можливістю зумувати та рухати карту.">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="map-page">
@@ -25,9 +27,12 @@
 
     <main>
         <div id="map"></div>
+        <div class="zoom-hint" id="zoomHint" data-i18n="zoomHint">Наближайте карту, щоб побачити більше населених пунктів</div>
+        <div class="map-loading" id="mapLoading"></div>
     </main>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
     <script src="i18n.js"></script>
     <script src="weather-icons.js"></script>
     <script src="map.js"></script>

@@ -14,7 +14,26 @@ document.addEventListener("DOMContentLoaded", function () {
         attribution: '© OpenStreetMap © CARTO'
     }).addTo(map);
 
-    var cities = [
+    // Поріг наближення, з якого починаємо довантажувати реальні населені пункти
+    var VILLAGE_ZOOM_THRESHOLD = 9;
+    // Ще ближче наближення - додаємо зовсім маленькі хутори
+    var HAMLET_ZOOM_THRESHOLD = 12;
+
+    var zoomHint = document.getElementById("zoomHint");
+    var mapLoading = document.getElementById("mapLoading");
+
+    function makeIcon(content, small) {
+        return L.divIcon({
+            className: small ? "weather-icon-label small" : "weather-icon-label",
+            html: content,
+            iconSize: small ? [50, 20] : [60, 26],
+            iconAnchor: small ? [25, 10] : [30, 13]
+        });
+    }
+
+    // ---------- Базові 25 обласних центрів (завжди видимі, як і раніше) ----------
+
+    var baseCities = [
         { name: "Луцьк", lat: 50.7472, lon: 25.3254 },
         { name: "Рівне", lat: 50.6199, lon: 26.2516 },
         { name: "Житомир", lat: 50.2547, lon: 28.6587 },
@@ -42,23 +61,14 @@ document.addEventListener("DOMContentLoaded", function () {
         { name: "Сімферополь", lat: 44.9521, lon: 34.1024 }
     ];
 
-    function makeIcon(content) {
-        return L.divIcon({
-            className: "weather-icon-label",
-            html: content,
-            iconSize: [60, 26],
-            iconAnchor: [30, 13]
-        });
-    }
+    var baseMarkers = {};
 
-    var markers = {};
-
-    cities.forEach(function (city) {
+    baseCities.forEach(function (city) {
         var marker = L.marker([city.lat, city.lon], { icon: makeIcon("⏳") }).addTo(map);
-        markers[city.name] = marker;
+        baseMarkers[city.name] = marker;
     });
 
-    cities.forEach(function (city) {
+    baseCities.forEach(function (city) {
         var url = "https://api.open-meteo.com/v1/forecast?latitude=" + city.lat +
             "&longitude=" + city.lon +
             "&daily=temperature_2m_max,temperature_2m_min,weathercode" +
@@ -72,17 +82,169 @@ document.addEventListener("DOMContentLoaded", function () {
                 var code = data.daily.weathercode[0];
                 var icon = getWeatherIcon(code);
 
-                markers[city.name].setIcon(makeIcon(icon + " +" + dayTemp + "°"));
+                baseMarkers[city.name].setIcon(makeIcon(icon + " +" + dayTemp + "°"));
 
                 var lang = getCurrentLang();
-                markers[city.name].bindPopup(
+                baseMarkers[city.name].bindPopup(
                     "<b>" + city.name + "</b><br>" +
                     getWeatherDescription(code, lang) + "<br>" +
                     "+" + dayTemp + "° / +" + nightTemp + "°"
                 );
             })
             .catch(function () {
-                markers[city.name].setIcon(makeIcon("⚠️"));
+                baseMarkers[city.name].setIcon(makeIcon("⚠️"));
             });
     });
+
+    // ---------- Динамічне довантаження всіх інших населених пунктів ----------
+
+    var villageCluster = L.markerClusterGroup({
+        maxClusterRadius: 45,
+        disableClusteringAtZoom: 15
+    });
+    map.addLayer(villageCluster);
+
+    var fetchedRegions = {}; // кеш вже завантажених ділянок, щоб не дублювати запити
+    var debounceTimer = null;
+
+    function updateZoomHint() {
+        if (map.getZoom() < VILLAGE_ZOOM_THRESHOLD) {
+            zoomHint.classList.remove("hidden");
+        } else {
+            zoomHint.classList.add("hidden");
+        }
+    }
+
+    function regionKey(bounds, zoom) {
+        // округлюємо межі, щоб не робити повторний запит за майже той самий регіон
+        return zoom + ":" +
+            bounds.getSouth().toFixed(1) + "," + bounds.getWest().toFixed(1) + "," +
+            bounds.getNorth().toFixed(1) + "," + bounds.getEast().toFixed(1);
+    }
+
+    function getPlaceRegex(zoom) {
+        if (zoom >= HAMLET_ZOOM_THRESHOLD) {
+            return "^(city|town|village|hamlet)$";
+        }
+        return "^(city|town|village)$";
+    }
+
+    function loadVillagesInView() {
+        var zoom = map.getZoom();
+
+        if (zoom < VILLAGE_ZOOM_THRESHOLD) {
+            villageCluster.clearLayers();
+            return;
+        }
+
+        var bounds = map.getBounds();
+        var key = regionKey(bounds, zoom);
+
+        if (fetchedRegions[key]) {
+            return;
+        }
+        fetchedRegions[key] = true;
+
+        var south = bounds.getSouth();
+        var west = bounds.getWest();
+        var north = bounds.getNorth();
+        var east = bounds.getEast();
+
+        var placeRegex = getPlaceRegex(zoom);
+
+        var query = "[out:json][timeout:25];" +
+            "node[\"place\"~\"" + placeRegex + "\"](" +
+            south + "," + west + "," + north + "," + east +
+            ");out body 400;";
+
+        var overpassUrl = "https://overpass-api.de/api/interpreter?data=" + encodeURIComponent(query);
+
+        mapLoading.textContent = t("loadingVillages");
+        mapLoading.classList.add("show");
+
+        fetch(overpassUrl)
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                mapLoading.classList.remove("show");
+                addVillages(data.elements || []);
+            })
+            .catch(function () {
+                mapLoading.classList.remove("show");
+            });
+    }
+
+    var shownIds = {};
+
+    function addVillages(elements) {
+        var newPoints = [];
+
+        elements.forEach(function (el) {
+            if (!el.tags || !el.tags.name) return;
+            if (shownIds[el.id]) return;
+            shownIds[el.id] = true;
+
+            newPoints.push({
+                id: el.id,
+                name: el.tags.name,
+                lat: el.lat,
+                lon: el.lon
+            });
+        });
+
+        if (!newPoints.length) return;
+
+        // групуємо координати для одного об'єднаного запиту погоди (Open-Meteo підтримує масив координат)
+        var latList = newPoints.map(function (p) { return p.lat; }).join(",");
+        var lonList = newPoints.map(function (p) { return p.lon; }).join(",");
+
+        var weatherUrl = "https://api.open-meteo.com/v1/forecast?latitude=" + latList +
+            "&longitude=" + lonList +
+            "&daily=temperature_2m_max,weathercode&timezone=auto";
+
+        var localMarkers = newPoints.map(function (p) {
+            var marker = L.marker([p.lat, p.lon], { icon: makeIcon("⏳", true) });
+            marker.bindPopup("<b>" + p.name + "</b>");
+            villageCluster.addLayer(marker);
+            return marker;
+        });
+
+        fetch(weatherUrl)
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                var resultsArray = Array.isArray(data) ? data : [data];
+
+                resultsArray.forEach(function (dayData, index) {
+                    if (!dayData || !dayData.daily || !localMarkers[index]) return;
+
+                    var dayTemp = Math.round(dayData.daily.temperature_2m_max[0]);
+                    var code = dayData.daily.weathercode[0];
+                    var icon = getWeatherIcon(code);
+
+                    localMarkers[index].setIcon(makeIcon(icon + " +" + dayTemp + "°", true));
+
+                    var lang = getCurrentLang();
+                    localMarkers[index].setPopupContent(
+                        "<b>" + newPoints[index].name + "</b><br>" +
+                        getWeatherDescription(code, lang) + "<br>" +
+                        "+" + dayTemp + "°"
+                    );
+                });
+            })
+            .catch(function () {
+                localMarkers.forEach(function (m) {
+                    m.setIcon(makeIcon("⚠️", true));
+                });
+            });
+    }
+
+    function debouncedLoad() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(function () {
+            updateZoomHint();
+            loadVillagesInView();
+        }, 900);
+    }
+
+    map.on("moveend zoomend", debouncedLoad);
+    updateZoomHint();
 });

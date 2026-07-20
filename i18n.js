@@ -28,7 +28,9 @@ var TRANSLATIONS = {
         sunset: "Захід сонця",
         uvLow: "низький", uvModerate: "помірний", uvHigh: "високий", uvVeryHigh: "дуже високий", uvExtreme: "екстремальний",
         aqiGood: "добра", aqiFair: "задовільна", aqiModerate: "помірна", aqiPoor: "погана", aqiVeryPoor: "дуже погана",
-        today: "Сьогодні", tomorrow: "Завтра"
+        today: "Сьогодні", tomorrow: "Завтра",
+        zoomHint: "Наближайте карту, щоб побачити більше населених пунктів",
+        loadingVillages: "Завантажуємо населені пункти..."
     },
     ru: {
         siteName: "Погода UA",
@@ -58,7 +60,9 @@ var TRANSLATIONS = {
         sunset: "Закат солнца",
         uvLow: "низкий", uvModerate: "умеренный", uvHigh: "высокий", uvVeryHigh: "очень высокий", uvExtreme: "экстремальный",
         aqiGood: "хорошее", aqiFair: "удовлетворительное", aqiModerate: "умеренное", aqiPoor: "плохое", aqiVeryPoor: "очень плохое",
-        today: "Сегодня", tomorrow: "Завтра"
+        today: "Сегодня", tomorrow: "Завтра",
+        zoomHint: "Приближайте карту, чтобы увидеть больше населённых пунктов",
+        loadingVillages: "Загружаем населённые пункты..."
     },
     en: {
         siteName: "Weather UA",
@@ -88,7 +92,9 @@ var TRANSLATIONS = {
         sunset: "Sunset",
         uvLow: "low", uvModerate: "moderate", uvHigh: "high", uvVeryHigh: "very high", uvExtreme: "extreme",
         aqiGood: "good", aqiFair: "fair", aqiModerate: "moderate", aqiPoor: "poor", aqiVeryPoor: "very poor",
-        today: "Today", tomorrow: "Tomorrow"
+        today: "Today", tomorrow: "Tomorrow",
+        zoomHint: "Zoom in to see more settlements",
+        loadingVillages: "Loading settlements..."
     }
 };
 
