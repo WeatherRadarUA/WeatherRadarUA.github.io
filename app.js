@@ -11,9 +11,82 @@ var recentSearches = [];
 var currentTheme = "light";
 var weatherSound = null;
 
+// Fallback функція перекладу, якщо i18n.js не завантажився
+function t(key) {
+    // Спробуємо використати глобальну функцію з i18n.js
+    if (typeof window.t === 'function') {
+        return window.t(key);
+    }
+    // Fallback переклади
+    var fallbackTranslations = {
+        loading: "Завантаження...",
+        searching: "Шукаємо...",
+        noResults: "Нічого не знайдено",
+        loadingWeather: "Завантажуємо прогноз...",
+        errorWeather: "Не вдалося завантажити погоду",
+        errorLocation: "Не вдалося визначити місцезнаходження",
+        errorGeolocation: "Увімкніть геолокацію в браузері",
+        feelsLike: "Відчувається як",
+        maxTemp: "Макс:",
+        minTemp: "Мін:",
+        humidity: "Вологість:",
+        wind: "Вітер:",
+        sunrise: "Схід сонця:",
+        sunset: "Захід сонця:",
+        dayLength: "Тривалість дня:",
+        uvIndex: "УФ-індекс",
+        airQuality: "Якість повітря",
+        visibility: "Видимість:",
+        precipitation: "Опади:",
+        next24h: "Погодинний прогноз на 24 години",
+        dayParts: "Прогноз за частинами дня",
+        forecast14: "Прогноз на 14 днів",
+        recentSearches: "Останні пошуки:",
+        noFavorites: "У вас поки що немає улюблених місць",
+        addToFavorites: "Додати в улюблені",
+        removeFromFavorites: "Видалити з улюблених",
+        useCurrentLocation: "Використано ваше місцезнаходження",
+        voiceNotSupported: "Голосовий пошук не підтримується",
+        voiceError: "Помилка розпізнавання голосу",
+        zoomHint: "Наближте карту, щоб побачити більше населених пунктів",
+        loadingVillages: "Завантажуємо населені пункти...",
+        radarTitle: "Радар опадів",
+        radarInfo: "Радар показує опади в реальному часі",
+        warningsTitle: "Попередження про погоду",
+        warningExample: "Наразі попереджень немає",
+        warningExampleText: "Попередження про небезпечну погоду з'являться тут",
+        siteName: "Погода UA",
+        navSearch: "Пошук",
+        navMap: "Карта",
+        navRadar: "Радар",
+        navWarnings: "Попередження",
+        heroTitle: "Сучасний прогноз погоди для України",
+        heroSubtitle: "Точні дані, інтерактивна карта, радар опадів",
+        feature1: "25+ тис. населених пунктів",
+        feature2: "Радар опадів в реальному часі",
+        feature3: "Попередження про небезпеку",
+        searchPlaceholder: "Введіть назву міста або села...",
+        today: "Сьогодні",
+        tomorrow: "Завтра",
+        morning: "Ранок",
+        day: "День",
+        evening: "Вечір",
+        night: "Ніч",
+        kmh: "км/г",
+        mm: "мм",
+        ukraine: "Україна",
+        dataSources: "Джерела даних",
+        dataSourcesText: "Дані надаються Open-Meteo, OpenStreetMap та іншими відкритими джерелами",
+        about: "Про нас",
+        feedback: "Зворотний зв'язок",
+        footerData: "Дані: Open-Meteo · OpenStreetMap · Ventusky"
+    };
+    return fallbackTranslations[key] || key;
+}
+
 // Ініціалізація при завантаженні сторінки
 document.addEventListener("DOMContentLoaded", function () {
-    // Приховуємо екран завантаження відразу, щоб не блокувати інтерфейс
+    // Приховуємо екран завантаження відразу
     hideLoadingScreen();
     
     // Застосовуємо переклади
@@ -54,7 +127,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Ініціалізація сповіщень
     initNotifications();
     
-    // Реєстрація Service Worker (після повного завантаження сторінки)
+    // Реєстрація Service Worker
     registerServiceWorker();
     
     // Перевірка оновлень
@@ -65,17 +138,13 @@ document.addEventListener("DOMContentLoaded", function () {
 function hideLoadingScreen() {
     var loadingScreen = document.getElementById("loadingScreen");
     if (loadingScreen) {
-        // Додаємо невелику затримку, щоб користувач побачив лого
-        setTimeout(function () {
-            loadingScreen.classList.add("hidden");
-        }, 300);
+        loadingScreen.classList.add("hidden");
     }
 }
 
 // Реєстрація Service Worker
 function registerServiceWorker() {
     if ('serviceWorker' in navigator) {
-        // Чекаємо 2 секунди, щоб сторінка повністю завантажилася
         setTimeout(function () {
             navigator.serviceWorker.register('/service-worker.js')
                 .then(function(registration) {
@@ -162,7 +231,9 @@ function initTheme() {
     // Кнопка перемикання теми
     var themeToggle = document.getElementById("themeToggle");
     if (themeToggle) {
-        themeToggle.addEventListener("click", function () {
+        themeToggle.addEventListener("click", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
             if (currentTheme === "light") {
                 currentTheme = "dark";
             } else if (currentTheme === "dark") {
@@ -215,58 +286,72 @@ function initSearch() {
     var clearBtn = document.getElementById("clearSearch");
     var voiceBtn = document.getElementById("voiceBtn");
     
+    if (!input) return;
+    
     var debounceTimer = null;
     
-    if (input) {
-        input.addEventListener("input", function () {
-            var query = input.value.trim();
-            clearTimeout(debounceTimer);
-            
-            if (query.length < 2) {
+    input.addEventListener("input", function () {
+        var query = input.value.trim();
+        clearTimeout(debounceTimer);
+        
+        if (query.length < 2) {
+            if (suggestionsBox) {
                 suggestionsBox.classList.remove("show");
                 suggestionsBox.innerHTML = "";
-                clearBtn.classList.remove("show");
-                return;
             }
-            
-            clearBtn.classList.add("show");
-            
-            debounceTimer = setTimeout(function () {
-                searchCities(query);
-            }, 400);
-        });
+            if (clearBtn) clearBtn.classList.remove("show");
+            return;
+        }
         
-        input.addEventListener("focus", function () {
-            if (input.value.trim().length >= 2) {
-                searchCities(input.value.trim());
-            }
-            renderRecentSearches(true);
-        });
+        if (clearBtn) clearBtn.classList.add("show");
         
-        input.addEventListener("keydown", function (e) {
-            if (e.key === "Escape") {
+        debounceTimer = setTimeout(function () {
+            searchCities(query);
+        }, 400);
+    });
+    
+    input.addEventListener("focus", function () {
+        if (input.value.trim().length >= 2) {
+            searchCities(input.value.trim());
+        }
+        renderRecentSearches(true);
+    });
+    
+    input.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") {
+            if (suggestionsBox) suggestionsBox.classList.remove("show");
+            input.blur();
+        }
+        if (e.key === "Enter" && input.value.trim().length >= 2) {
+            // Автоматичний пошук при натисканні Enter
+            var query = input.value.trim();
+            if (suggestionsBox) {
                 suggestionsBox.classList.remove("show");
-                input.blur();
+                suggestionsBox.innerHTML = "";
             }
-        });
-    }
+            // Шукаємо перше місто з цим ім'ям
+            searchCitiesAndSelectFirst(query);
+        }
+    });
     
     // Очищення пошуку
     if (clearBtn) {
-        clearBtn.addEventListener("click", function () {
-            if (input) {
-                input.value = "";
-                input.focus();
+        clearBtn.addEventListener("click", function (e) {
+            e.preventDefault();
+            input.value = "";
+            input.focus();
+            if (suggestionsBox) {
                 suggestionsBox.classList.remove("show");
                 suggestionsBox.innerHTML = "";
-                clearBtn.classList.remove("show");
             }
+            if (clearBtn) clearBtn.classList.remove("show");
         });
     }
     
     // Голосовий пошук
     if (voiceBtn) {
-        voiceBtn.addEventListener("click", function () {
+        voiceBtn.addEventListener("click", function (e) {
+            e.preventDefault();
             startVoiceSearch();
         });
     }
@@ -302,6 +387,29 @@ function searchCities(query) {
         });
 }
 
+function searchCitiesAndSelectFirst(query) {
+    var lang = getCurrentLang();
+    var url = "https://geocoding-api.open-meteo.com/v1/search?name=" +
+        encodeURIComponent(query) + "&count=1&language=" + lang + "&format=json";
+    
+    fetch(url)
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (data.results && data.results.length > 0) {
+                var place = data.results[0];
+                currentPlace = place;
+                activeDayIndex = 0;
+                showWeatherFor(place);
+                addToRecentSearches(place);
+            } else {
+                showToast(t("noResults"), "error");
+            }
+        })
+        .catch(function () {
+            showToast(t("errorWeather"), "error");
+        });
+}
+
 function renderSuggestions(results) {
     var suggestionsBox = document.getElementById("suggestions");
     if (!suggestionsBox) return;
@@ -329,9 +437,8 @@ function renderSuggestions(results) {
             "<div class='sub'>" + subParts.join(", ") + "</div>";
         
         item.addEventListener("click", function () {
-            if (document.getElementById("cityInput")) {
-                document.getElementById("cityInput").value = place.name;
-            }
+            var input = document.getElementById("cityInput");
+            if (input) input.value = place.name;
             suggestionsBox.classList.remove("show");
             currentPlace = place;
             activeDayIndex = 0;
@@ -380,9 +487,8 @@ function renderRecentSearches(showEmpty = false) {
             if (e.target.classList.contains("remove") || e.target.parentElement.classList.contains("remove")) {
                 removeFromRecentSearches(index);
             } else {
-                if (document.getElementById("cityInput")) {
-                    document.getElementById("cityInput").value = place.name;
-                }
+                var input = document.getElementById("cityInput");
+                if (input) input.value = place.name;
                 currentPlace = place;
                 activeDayIndex = 0;
                 showWeatherFor(place);
@@ -434,14 +540,16 @@ function startVoiceSearch() {
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
     
+    var input = document.getElementById("cityInput");
+    if (input) input.value = t("listening");
+    
     recognition.start();
     
     recognition.onresult = function (event) {
         var transcript = event.results[0][0].transcript;
-        var input = document.getElementById("cityInput");
         if (input) {
             input.value = transcript;
-            searchCities(transcript);
+            searchCitiesAndSelectFirst(transcript);
         }
     };
     
@@ -460,7 +568,9 @@ function startVoiceSearch() {
 function initGeolocation() {
     var geolocBtn = document.getElementById("geolocBtn");
     if (geolocBtn) {
-        geolocBtn.addEventListener("click", function () {
+        geolocBtn.addEventListener("click", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
             getCurrentLocation();
         });
     }
@@ -547,21 +657,27 @@ function initFavorites() {
     
     // Кнопка улюблених в хедери
     if (favBtn) {
-        favBtn.addEventListener("click", function () {
+        favBtn.addEventListener("click", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
             toggleFavoritesSidebar();
         });
     }
     
     // Перемикач улюблених на картці погоди
     if (favToggle) {
-        favToggle.addEventListener("click", function () {
+        favToggle.addEventListener("click", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
             toggleFavorite();
         });
     }
     
     // Закриття сайдбару
     if (closeFav) {
-        closeFav.addEventListener("click", function () {
+        closeFav.addEventListener("click", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
             closeFavoritesSidebar();
         });
     }
@@ -698,14 +814,16 @@ function initModals() {
     var closeRadar = document.getElementById("closeRadar");
     
     if (radarBtn && radarModal) {
-        radarBtn.addEventListener("click", function () {
+        radarBtn.addEventListener("click", function (e) {
+            e.preventDefault();
             radarModal.classList.add("show");
             document.body.style.overflow = "hidden";
         });
     }
     
     if (closeRadar && radarModal) {
-        closeRadar.addEventListener("click", function () {
+        closeRadar.addEventListener("click", function (e) {
+            e.preventDefault();
             radarModal.classList.remove("show");
             document.body.style.overflow = "";
         });
@@ -717,7 +835,8 @@ function initModals() {
     var closeWarnings = document.getElementById("closeWarnings");
     
     if (warningsBtn && warningsModal) {
-        warningsBtn.addEventListener("click", function () {
+        warningsBtn.addEventListener("click", function (e) {
+            e.preventDefault();
             warningsModal.classList.add("show");
             document.body.style.overflow = "hidden";
             loadWarnings();
@@ -725,7 +844,8 @@ function initModals() {
     }
     
     if (closeWarnings && warningsModal) {
-        closeWarnings.addEventListener("click", function () {
+        closeWarnings.addEventListener("click", function (e) {
+            e.preventDefault();
             warningsModal.classList.remove("show");
             document.body.style.overflow = "";
         });
@@ -752,8 +872,6 @@ function initModals() {
 }
 
 function loadWarnings() {
-    // Наразі попередження не реалізовані через API
-    // Можна додати інтеграцію з українськими метеослужбами
     var warningsList = document.getElementById("warningsList");
     if (warningsList) {
         warningsList.innerHTML = "<div class='warning-item info'>" +
@@ -775,11 +893,13 @@ function initScroll() {
     var scrollRight = document.getElementById("hourlyScrollRight");
     
     if (hourlyScroll && scrollLeft && scrollRight) {
-        scrollLeft.addEventListener("click", function () {
+        scrollLeft.addEventListener("click", function (e) {
+            e.preventDefault();
             hourlyScroll.scrollBy({ left: -200, behavior: "smooth" });
         });
         
-        scrollRight.addEventListener("click", function () {
+        scrollRight.addEventListener("click", function (e) {
+            e.preventDefault();
             hourlyScroll.scrollBy({ left: 200, behavior: "smooth" });
         });
     }
@@ -861,12 +981,15 @@ function showToast(message, type = "info") {
     }, 3000);
     
     // Закриття по кліку
-    toast.querySelector(".toast-close").addEventListener("click", function () {
-        toast.style.animation = "slideInRight 0.3s ease reverse";
-        setTimeout(function () {
-            toast.remove();
-        }, 300);
-    });
+    var closeBtn = toast.querySelector(".toast-close");
+    if (closeBtn) {
+        closeBtn.addEventListener("click", function () {
+            toast.style.animation = "slideInRight 0.3s ease reverse";
+            setTimeout(function () {
+                toast.remove();
+            }, 300);
+        });
+    }
 }
 
 // ============================================
@@ -885,7 +1008,6 @@ function checkForUpdates() {
     // Перевірка нової версії
     if (localStorage.getItem("weatherua_version") !== "2.0") {
         localStorage.setItem("weatherua_version", "2.0");
-        showToast(t("siteName") + " оновлено до версії 2.0!");
     }
 }
 
