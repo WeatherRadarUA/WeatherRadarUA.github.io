@@ -13,7 +13,22 @@ var TRANSLATIONS = {
         errorWeather: "Не вдалося завантажити погоду. Спробуйте ще раз.",
         feelsLike: "Відчувається як",
         next24h: "Погодинний прогноз на 24 години",
-        locale: "uk-UA"
+        locale: "uk-UA",
+        precipitation: "Опади",
+        wind: "Вітер",
+        morning: "Ранок",
+        day: "День",
+        evening: "Вечір",
+        night: "Ніч",
+        dayParts: "Прогноз за частинами доби",
+        forecast14: "Прогноз на 14 днів",
+        uvIndex: "УФ-індекс",
+        airQuality: "Якість повітря",
+        sunrise: "Схід сонця",
+        sunset: "Захід сонця",
+        uvLow: "низький", uvModerate: "помірний", uvHigh: "високий", uvVeryHigh: "дуже високий", uvExtreme: "екстремальний",
+        aqiGood: "добра", aqiFair: "задовільна", aqiModerate: "помірна", aqiPoor: "погана", aqiVeryPoor: "дуже погана",
+        today: "Сьогодні", tomorrow: "Завтра"
     },
     ru: {
         siteName: "Погода UA",
@@ -28,7 +43,22 @@ var TRANSLATIONS = {
         errorWeather: "Не удалось загрузить погоду. Попробуйте ещё раз.",
         feelsLike: "Ощущается как",
         next24h: "Почасовой прогноз на 24 часа",
-        locale: "ru-RU"
+        locale: "ru-RU",
+        precipitation: "Осадки",
+        wind: "Ветер",
+        morning: "Утро",
+        day: "День",
+        evening: "Вечер",
+        night: "Ночь",
+        dayParts: "Прогноз по частям суток",
+        forecast14: "Прогноз на 14 дней",
+        uvIndex: "УФ-индекс",
+        airQuality: "Качество воздуха",
+        sunrise: "Восход солнца",
+        sunset: "Закат солнца",
+        uvLow: "низкий", uvModerate: "умеренный", uvHigh: "высокий", uvVeryHigh: "очень высокий", uvExtreme: "экстремальный",
+        aqiGood: "хорошее", aqiFair: "удовлетворительное", aqiModerate: "умеренное", aqiPoor: "плохое", aqiVeryPoor: "очень плохое",
+        today: "Сегодня", tomorrow: "Завтра"
     },
     en: {
         siteName: "Weather UA",
@@ -43,7 +73,22 @@ var TRANSLATIONS = {
         errorWeather: "Could not load weather. Please try again.",
         feelsLike: "Feels like",
         next24h: "24-hour forecast",
-        locale: "en-US"
+        locale: "en-US",
+        precipitation: "Precipitation",
+        wind: "Wind",
+        morning: "Morning",
+        day: "Day",
+        evening: "Evening",
+        night: "Night",
+        dayParts: "Forecast by time of day",
+        forecast14: "14-day forecast",
+        uvIndex: "UV index",
+        airQuality: "Air quality",
+        sunrise: "Sunrise",
+        sunset: "Sunset",
+        uvLow: "low", uvModerate: "moderate", uvHigh: "high", uvVeryHigh: "very high", uvExtreme: "extreme",
+        aqiGood: "good", aqiFair: "fair", aqiModerate: "moderate", aqiPoor: "poor", aqiVeryPoor: "very poor",
+        today: "Today", tomorrow: "Tomorrow"
     }
 };
 

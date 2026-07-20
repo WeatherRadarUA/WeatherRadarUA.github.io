@@ -52,3 +52,21 @@ function getWeatherDescription(code, lang) {
     var dict = WEATHER_DESC[lang] || WEATHER_DESC.uk;
     return dict[code] || dict[3];
 }
+
+// Категорія УФ-індексу за стандартною шкалою ВООЗ
+function getUvCategory(uv) {
+    if (uv < 3) return "uvLow";
+    if (uv < 6) return "uvModerate";
+    if (uv < 8) return "uvHigh";
+    if (uv < 11) return "uvVeryHigh";
+    return "uvExtreme";
+}
+
+// Категорія якості повітря за європейським індексом (European AQI)
+function getAqiCategory(aqi) {
+    if (aqi <= 20) return "aqiGood";
+    if (aqi <= 40) return "aqiFair";
+    if (aqi <= 60) return "aqiModerate";
+    if (aqi <= 80) return "aqiPoor";
+    return "aqiVeryPoor";
+}
