@@ -13,6 +13,9 @@ var weatherSound = null;
 
 // Ініціалізація при завантаженні сторінки
 document.addEventListener("DOMContentLoaded", function () {
+    // Приховуємо екран завантаження відразу, щоб не блокувати інтерфейс
+    hideLoadingScreen();
+    
     // Застосовуємо переклади
     applyTranslations();
     
@@ -29,13 +32,6 @@ document.addEventListener("DOMContentLoaded", function () {
     
     // Визначення теми
     initTheme();
-    
-    // Приховуємо екран завантаження після завантаження сторінки
-    window.addEventListener("load", function () {
-        setTimeout(function () {
-            document.getElementById("loadingScreen").classList.add("hidden");
-        }, 500);
-    });
     
     // Ініціалізація пошуку
     initSearch();
@@ -58,9 +54,39 @@ document.addEventListener("DOMContentLoaded", function () {
     // Ініціалізація сповіщень
     initNotifications();
     
+    // Реєстрація Service Worker (після повного завантаження сторінки)
+    registerServiceWorker();
+    
     // Перевірка оновлень
     checkForUpdates();
 });
+
+// Функція для приховування екрану завантаження
+function hideLoadingScreen() {
+    var loadingScreen = document.getElementById("loadingScreen");
+    if (loadingScreen) {
+        // Додаємо невелику затримку, щоб користувач побачив лого
+        setTimeout(function () {
+            loadingScreen.classList.add("hidden");
+        }, 300);
+    }
+}
+
+// Реєстрація Service Worker
+function registerServiceWorker() {
+    if ('serviceWorker' in navigator) {
+        // Чекаємо 2 секунди, щоб сторінка повністю завантажилася
+        setTimeout(function () {
+            navigator.serviceWorker.register('/service-worker.js')
+                .then(function(registration) {
+                    console.log('ServiceWorker registration successful');
+                })
+                .catch(function(err) {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+        }, 2000);
+    }
+}
 
 // ============================================
 // Завантаження збережених даних
@@ -116,7 +142,7 @@ function initTheme() {
     if (savedTheme) {
         currentTheme = savedTheme;
     } else {
-        // Визначення системної теми
+        // Визначення мови браузера
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
             currentTheme = "dark";
         }
@@ -448,7 +474,7 @@ function getCurrentLocation() {
     
     var statusMsg = document.getElementById("statusMsg");
     if (statusMsg) {
-        statusMsg.textContent = t("loadingLocation");
+        statusMsg.textContent = t("loading");
         statusMsg.style.display = "block";
         statusMsg.className = "status-msg";
     }
